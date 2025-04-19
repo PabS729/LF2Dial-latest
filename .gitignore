@@ -1,0 +1,6 @@
+.env
+classification_results/*
+eval_results/*
+res_new/*
+results/*
+chat_history_results/*
