@@ -68,6 +68,12 @@ In your response, first analyze of whether the student's response can address th
 <toulmin>: {history}
 """
 
+TEACHER_ACT_ANS = """
+<response> is your current response based on the option above. Please rephrase the response so that it serves to answer the student's question, as well as supporting your claim that <sentence> is logically flawed. Limit your answer to 50 words.
+
+<sentence>: {sentence}
+<response>: {history}
+"""
 
 
 TEACHER_ACT_REFUTE = """

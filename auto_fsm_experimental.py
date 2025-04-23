@@ -22,8 +22,8 @@ async def main():
     parser.add_argument("--use_banks", type=bool, default=False)
     parser.add_argument("--use_adv", type=bool, default=True)
     parser.add_argument("--use_toulmin", type=bool, default=False)
-    parser.add_argument("--use_FSM", type=bool, default=True)
-    parser.add_argument("--save_fn", type=str, default='results/0418_div_fsm_all')
+    parser.add_argument("--use_FSM", type=bool, default=False)
+    parser.add_argument("--save_fn", type=str, default='results/0421_pers_base_s_2')
     parser.add_argument("--sample", type=int, default=-1)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--num_gen", type=int, default=0)
@@ -31,18 +31,18 @@ async def main():
     args = parser.parse_args()
 
     df_to_argue = pd.read_csv(args.file_to_annotate)
-    # sampled_df = df_to_argue.sample(n=1, random_state=2)
+    sampled_df = df_to_argue.sample(n=1, random_state=25)
     # sampled_df = df_to_argue
-    sampled_df = df_to_argue["Context"].values.tolist()
+    # sampled_df = df_to_argue["Context"].values.tolist()
     # labels = df_to_argue["Label"].values.tolist()
     # df_lf = pd.read_csv
     # df_components = pd.read_excel(args.components_to_read)
     # sampled_df = df_to_argue.loc[df_to_argue["updated_label"] == "ad populum"].sample(n=1, random_state=15)
     # strategy = strategy_dc_commonsense["fallacy of credibility"]
     # strategy = emo_alt
-    # sentences = sampled_df["Context"].values.tolist()
+    sentences = sampled_df["Context"].values.tolist()
     # labels = sampled_df["Label"].values.tolist()
-    sentences = sampled_df[args.num_gen:args.num_gen+100]
+    # sentences = sampled_df[args.num_gen:args.num_gen+100]
     # sentences = set(sentences)
     # sentences = list(sentences)[150:172]
     # labels = labels[1000:1300]
@@ -72,7 +72,7 @@ async def main():
 
     ADV_PROMPT = [PROMPT_STUDENT_ADV_DIVERT, PROMPT_STUDENT_ADV_PERSUASION, PROMPT_STUDENT_ADV_REPETITION, PROMPT_STUDENT_ADV_CONTEXT, PROMPT_STUDENT_ADV_TERMS, PROMPT_STUDENT_ADV_GUIDANCE]
     
-
+    adv_p = ADV_PROMPT[1]
     def appends(a, b, c, d, e, f, g, h, i, j, k):
         conversation_teacher.append(a)
         conversation_student.append(b)
@@ -147,10 +147,10 @@ async def main():
             if args.use_toulmin:
                 student_res = await generate_res("student_bio", model_student, example_sentence, toulmin, None, None, conv_teacher, conv_student, PROMPT_STUDENT_RESPOND, 0)
             elif args.use_adv:
-                student_res = await generate_res("stu", model_student, example_sentence, "", None, None, conv_teacher, conv_student, ADV_PROMPT[0], 0)
+                student_res = await generate_res("stu", model_student, example_sentence, "", None, None, conv_teacher, conv_student, adv_p, 0)
                 student_u = load_json(student_res.choices[0].message.content)
                 while student_u == False:
-                    utterance_student = await generate_res("stu", model_student, example_sentence, start_student_strategy, None, None, conv_teacher, conv_student, ADV_PROMPT[0], 0)
+                    utterance_student = await generate_res("stu", model_student, example_sentence, start_student_strategy, None, None, conv_teacher, conv_student, adv_p, 0)
                     student_u = load_json(utterance_student.choices[0].message.content)
             else:
                 student_res = await generate_res("stu", model_student, example_sentence, "request the teacher to provide examples that support their claim", None, None, conv_teacher, conv_student, PROMPT_STUDENT_ARGUE_NORMAL + PT_2, 0)
@@ -383,7 +383,7 @@ async def main():
                         print(count_states)
                         print("before random generation: " + next_state)
 
-                        if count_states["3"] > 3:
+                        if count_states["3"] > 2 or FSM_STATES[-1] == "3":
                             count_states["3"] -= 1
                             next_state = "2"
                             count_states[next_state] += 1
@@ -435,11 +435,13 @@ async def main():
                         
                         #rephrase the teacher's response, if we found that it is not following the expected state.
                         
-                        if ("no" in cs['1'].lower() or "no" in cs['2'].lower()) and next_state in ['1', '4', '2']:
+                        if ("no" in cs['1'].lower() or "no" in cs['2'].lower()):
                             if next_state in ['1', '4']:
                                 pt = TEACHER_ACT_EX_AS
-                            else:
+                            elif next_state == "2":
                                 pt = TEACHER_ACT_REFUTE
+                            else:
+                                pt = TEACHER_ACT_ANS
                             teacher_res = await generate_res("agents", model_teacher, example_sentence, teacher_res.choices[0].message.content, None, None, None, None, TEACHER_ACT_1 + STRAT_FOR_STATES_R[next_state] + pt, 1)
                             check_following_res = await generate_res("eval_s", model_student, example_sentence, teacher_res.choices[0].message.content, STRAT_FOR_STATES_R[next_state], None, None, None, CHECK_FOLLOW_FSM_AGENT, 0)
                             cs = load_json(check_following_res.choices[0].message.content)
@@ -484,10 +486,10 @@ async def main():
                     print("--------------------utterance--------------------")
                     print(utterance_teacher)
                     if args.use_adv:
-                        student_res = await generate_res("stu", model_student, example_sentence, start_student_strategy, None, None, conv_teacher, conv_student, ADV_PROMPT[0], 0)
+                        student_res = await generate_res("stu", model_student, example_sentence, start_student_strategy, None, None, conv_teacher, conv_student, adv_p, 0)
                         student_u = load_json(student_res.choices[0].message.content)
                         while student_u == False:
-                            utterance_student = await generate_res("stu", model_student, example_sentence, start_student_strategy, None, None, conv_teacher, conv_student, ADV_PROMPT[0], 0)
+                            utterance_student = await generate_res("stu", model_student, example_sentence, start_student_strategy, None, None, conv_teacher, conv_student, adv_p, 0)
                             student_u = load_json(utterance_student.choices[0].message.content)
                         utterance_student = student_u["res"]
                         print("student strategy:"+student_u["option"])
@@ -550,10 +552,10 @@ async def main():
                     if "?" in utterance_teacher and "?" in utterance_student:
                         utter = "You have not answered the question I asked. Please answer it before making any requests. " + utterance_teacher
                         conv_teacher.append(utter)
-                        utterance_student = await generate_res("stu", model_student, example_sentence, start_student_strategy, None, None, conv_teacher, conv_student, ADV_PROMPT[0], 0)
+                        utterance_student = await generate_res("stu", model_student, example_sentence, start_student_strategy, None, None, conv_teacher, conv_student, adv_p, 0)
                         student_u = load_json(utterance_student.choices[0].message.content)
                         while student_u == False:
-                            utterance_student = await generate_res("stu", model_student, example_sentence, start_student_strategy, None, None, conv_teacher, conv_student, ADV_PROMPT[0], 0)
+                            utterance_student = await generate_res("stu", model_student, example_sentence, start_student_strategy, None, None, conv_teacher, conv_student, adv_p, 0)
                             student_u = load_json(utterance_student.choices[0].message.content)                           
                         utterance_student = student_u["res"]
                         print("student strategy:"+student_u["option"])
@@ -594,10 +596,10 @@ async def main():
                         confirm_disagreement = "If you cannot provide any evidence at all, then I would suggest looking for them if you have time later. Do you still have any other concerns regarding the sentence's logical validity?" 
                         print(confirm_disagreement)
                         conv_teacher.append(confirm_disagreement)
-                        student_utterance = await generate_res("stu", model_student, example_sentence, start_student_strategy, None, None, conv_teacher, conv_student, ADV_PROMPT[0], 0)
+                        student_utterance = await generate_res("stu", model_student, example_sentence, start_student_strategy, None, None, conv_teacher, conv_student, adv_p, 0)
                         student_u = load_json(student_utterance.choices[0].message.content)
                         while student_u == False:
-                            student_utterance = await generate_res("stu", model_student, example_sentence, start_student_strategy, None, None, conv_teacher, conv_student, ADV_PROMPT[0], 0)
+                            student_utterance = await generate_res("stu", model_student, example_sentence, start_student_strategy, None, None, conv_teacher, conv_student, adv_p, 0)
                             student_u = load_json(student_utterance.choices[0].message.content)
                         utterance_student = student_u["res"]
                         print("student strategy:"+student_u["option"])

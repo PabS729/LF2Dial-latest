@@ -3,7 +3,7 @@ import random
 import math
 import asyncio
 from persona_roleplay.respond_role import generate_res
-fi = pd.read_excel("processed_all_fsm_a.xlsx", index_col=None)
+fi = pd.read_excel("processed_term_base_a.xlsx", index_col=None)
 # from sklearn.utils import shuffle
 
 
@@ -13,7 +13,7 @@ kdd = [k for k in fi.keys() if k not in ["sentences", "chats", "Unnamed: 0"]]
 
 fi_1 = fi.drop_duplicates(["sentences"])
 print(len(fi_1["sentences"]))
-fi2 = pd.read_excel("classification_results/okk_all_new_2.xlsx")
+fi2 = pd.read_excel("processed_fsm_eval_div.xlsx")
 # comb = pd.concat([fi_1, fi2], axis=0)
 comb = fi
 # comb.replace(to_replace=r'yes*|Yes*',
@@ -105,7 +105,7 @@ async def sd():
 d = asyncio.run(sd())
 print(yesss)
 print(nooo)
-comb_b.to_excel("processed_fsm_a_all.xlsx")
+comb_b.to_excel("processed_base_eval_term_a.xlsx")
 # for k in kdd:
 #     random.seed(20)
 #     if k in ["divergence", "stance_change", "complex_refutation", "stance_change", "structured"]:
