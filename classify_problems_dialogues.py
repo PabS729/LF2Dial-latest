@@ -17,17 +17,17 @@ from tqdm import tqdm
 # PF = [PROMPT_CLASSIFY_PERSPECTIVE, PROMPT_CLASSIFY_PROACTIVE, PROMPT_CLASSIFY_TERMS]
 # PF = [PROMPT_CLASSIFY_GUIDANCE, PROMPT_CLASSIFY_PERSPECTIVE, PROMPT_CLASSIFY_TERMS, PROMPT_CLASSIFY_RELEVANCE, PROMPT_CLASSIFY_STANCE_CHANGE, PROMPT_CLASSIFY_COMPLEX_REFUTATION, PROMPT_CLASSIFY_REPETITION, PROMPT_CLASSIFY_PROOF]
 # PF = [PROMPT_CLASSIFY_PERSPECTIVE, PROMPT_CLASSIFY_PROOF, PROMPT_CLASSIFY_STRUCTURED_ANALYSIS, PROMPT_CLASSIFY_REPETITION]
-PF = [PROMPT_CLASSIFY_TERMS]
-ls = ["terms","divergence", "stance_change"]
+PF = [PROMPT_CLASSIFY_GUIDANCE]
+ls = ["guidance","divergence", "stance_change"]
 ns = [[],[],[],[],[],[],[],[],[],[],[]]
 async def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dialogue1", type=str, default='chat_history_results/0420_term_fsm_all')
+    parser.add_argument("--dialogue1", type=str, default='chat_history_results/0424_gui_fsm_10250.xlsx')
     parser.add_argument("--dataset", type=str, default='st_wo_duplicates.csv')
     parser.add_argument("--use_category", type=bool, default=False)
     parser.add_argument("--use_toulmin", type=bool, default=True)
     parser.add_argument("--mode", type=str, default='proposed')
-    parser.add_argument("--save_fn", type=str, default='results/term_fsm_')
+    parser.add_argument("--save_fn", type=str, default='results/gui_fsm_')
     parser.add_argument("--sample", type=int, default=-1)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--num_gen", type=int, default=0)
@@ -39,8 +39,9 @@ async def main():
     history1 = ann
 
     # df_to_argue = pd.read_csv(args.dataset)
+    dialogues_1 = pd.read_excel(history1)
 
-    dialogues_1 = pd.read_excel(history1 + str(args.num_gen) + ".xlsx")
+    # dialogues_1 = pd.read_excel(history1 + str(args.num_gen) + ".xlsx")
     x = args.num_gen
 
     # sentences = dialogues_1["sentences"].values.tolist()[args.num_gen:args.num_gen+100]

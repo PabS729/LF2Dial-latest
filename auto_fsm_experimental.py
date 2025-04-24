@@ -22,8 +22,8 @@ async def main():
     parser.add_argument("--use_banks", type=bool, default=False)
     parser.add_argument("--use_adv", type=bool, default=True)
     parser.add_argument("--use_toulmin", type=bool, default=False)
-    parser.add_argument("--use_FSM", type=bool, default=False)
-    parser.add_argument("--save_fn", type=str, default='results/0421_pers_base_s_2')
+    parser.add_argument("--use_FSM", type=bool, default=True)
+    parser.add_argument("--save_fn", type=str, default='results/0424_gui_fsm_1025')
     parser.add_argument("--sample", type=int, default=-1)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--num_gen", type=int, default=0)
@@ -72,7 +72,7 @@ async def main():
 
     ADV_PROMPT = [PROMPT_STUDENT_ADV_DIVERT, PROMPT_STUDENT_ADV_PERSUASION, PROMPT_STUDENT_ADV_REPETITION, PROMPT_STUDENT_ADV_CONTEXT, PROMPT_STUDENT_ADV_TERMS, PROMPT_STUDENT_ADV_GUIDANCE]
     
-    adv_p = ADV_PROMPT[1]
+    adv_p = ADV_PROMPT[-1]
     def appends(a, b, c, d, e, f, g, h, i, j, k):
         conversation_teacher.append(a)
         conversation_student.append(b)
